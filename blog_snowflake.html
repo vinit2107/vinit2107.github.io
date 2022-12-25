@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vinit Deshbhratar: Snowflake</title>
+</head>
+<body>
+    <h1>My Journey: Snowflake</h1>
+    <p>
+        This is the first of the series of articles that I plan on writing about the technologies that I have worked on,
+        what did I use it for, any issues that I faced, performance tweaks and everything I can think of about the tool.
+        <br><br>
+        Let's get started!!
+        <br><br>
+        I first came across Snowflake during my tenure at ATD where I was working as a Data Engineer. We wanted to use
+        Snowflake as a modern data platform for the company. To summarize my job, it was to land the data in Snowflake,
+        transform the data and make it available to the business users. We also had to do the tasks like data reconciliation,
+        data quality, alerting etc.
+        <br><br>
+        Here's what makes Snowflake unique:<br><br>
+        ⌘ It uses multi-cluster, shared-data architecture. <br>
+        ⌘ Separation of storage and compute allows unlimited scalability which is independent of each other. <br>
+        ⌘ Can use any of the major cloud providers <br>
+        ⌘ Makes life easier when you want to expose data to external vendors (Data Sharing) <br>
+        ⌘ Partner Connect and Data Marketplace <br>
+        ⌘ Super fast!!<br>
+
+        <br>
+        I don't want this article to be a walk through for Snowflake as it's all well-documented on the official webpage.
+        I'll be providing my two cents on my observations and learning over a year using Snowflake and hope you learn
+        something new here.
+
+        <br><br>
+        <h3>What makes snowflake fast?</h3>
+        The answer comes down to the architecture. Snowflake has three layers to it, Cloud Data Services, Compute and Storage.
+        Cloud Data Services is responsible for storing metadata for everything that is stored in snowflake. Compute is basically
+        your EMR clusters which are spun up as soon as you request/run a query and can be auto-terminated. For storage,
+        Snowflake uses a proprietary file format. It stores the data in columnar format and uses industry best compression.<br>
+        Snowflake stores a tonn of metadata, right from min, max values of the table, row count of tables, information
+        and this information about each micro-partition is stored in Cloud Services Layer. So if you want to get rowcount
+        of a table, it would be a metadata operation rather than a operation on the table. Snowflake also stores query
+        response data in the same layer and can be reused but needs to satisfy 7 criteria. Also, because it stores a
+        tonn of metadata, it also knows which files to read in the storage layer which reduces your I/Os.<br>
+        <strong>Bonus: </strong>Here's how I explain how smart snowflake is compared to its competitor BigQuery. In BigQuery
+        whenever you re-run a query which has a CTE in it, the query will always run from scratch. If you compare against
+        Snowflake, snowflake could end up using the same query response cache (again, if the 7 criteria I mentioned above
+        are satisfied) and this is all possible because of the metadata that Snowflake collects. <br>
+
+        <br>
+        <h3>How does Snowflake process a query?</h3>
+        Query processing starts from Cloud Services Layer. This is where the query is optimized and a query plan is created
+        for the warehouse to work on. You cannot control sequence of joins in Snowflake. Unconsciously, the developer
+        may end up writing SQL in a way where he thinks a query would be filtered by the time a specific join runs
+        and you may end up with a surprise at the other end. The sequence of the joins is all governed by the data
+        collected about the tables. Snowflake internally uses bloom filters and are heavily statistics driven. Any
+        update that you perform on the table, may skew the query plan and you may get a new behavior altogether. Please
+        make sure you take care of the table where you have one-to-many cardinality in some temporary stage table. <br>
+        <strong>Bonus: </strong>Whenever you perform a join in Snowflake, it is always a hash join. If you see a query
+        plan for a SQL with joins in it, you'll see two blocks, let's say Table1 (on the left) and Table2 (on the right)
+        joined. The table on the left is used as a iterator. That means Snowflake iterates on that table to join with
+        the table on right. If the statistics work fine, and the query is most optimized, Table1 will have lower row count
+        as compared to Table2. If you see anything other than that, you can consider there's some room for performance
+        improvement in your queries. You can create specific stage tables in a way where you control the sequence of
+        joins and get away from this scenario.<br>
+
+        <br>
+        <h3>My two cents on SnowPro Certification</h3>
+        To be updated!
+    </p>
+</body>
+</html>
